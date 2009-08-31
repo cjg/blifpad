@@ -1,0 +1,5 @@
+#!/bin/sh
+
+java -jar %DESTDIR%/lib/BlifPad/BlifPad.jar $@
+
+# End Of File

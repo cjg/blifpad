@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="text/blif">
+         <comment>Berkeley Logic Interchange Format</comment>
+         <glob pattern="*.blif"/>
+  </mime-type>
+</mime-info>

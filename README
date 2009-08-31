@@ -1,0 +1,19 @@
+* What is BlifPad?
+BlifPad is a simple editor for Berkeley Logic Interchange Format (blif) files.
+It provides also a simple graphical interface to Berkeley SIS.
+
+* Build
+BlifPad is written in java, to obtain an executable java archive (jar) just run 
+% make
+from the topdir directory.
+
+* GNU/Linux, *BSD and also
+If you're using a system that supports freedesktop.org standards (for handling
+mime types and launchers) go into the freedesktop subdirectory and run
+% make
+% make install
+
+* MacOSX
+To obtain a valid MacOSX .app application go into the macosx subdirectory and
+run 
+% make
