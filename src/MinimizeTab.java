@@ -66,16 +66,18 @@ public class MinimizeTab extends SisTab {
         ruggedCounter = 0;
 
         while (true) {
+            ruggedCounter++;
             if((minimized = getMinimized(path, minimizedName))==null)
                 return null;
             if(oldMinimized != null)
                 oldMinimized.delete();
-            if(getStdOut().equals(oldStdOut))
+            if(getStdOut().equals(oldStdOut)){
+                ruggedCounter--;
                 break;
+            }
             oldStdOut = getStdOut();
             oldMinimized = minimized;
             minimizedName = minimized.getName();
-            ruggedCounter++;
         }
         
         if(minimized != null)
@@ -87,7 +89,7 @@ public class MinimizeTab extends SisTab {
                                                         outfile);
 
 
-            fos.write(("# Applied script.rugged " + (--ruggedCounter) + 
+            fos.write(("# Applied script.rugged " + (ruggedCounter) + 
                        " time(s)!\n" +  getStdOut()).getBytes());
             fos.close();
         } catch (IOException e) {
@@ -121,7 +123,7 @@ public class MinimizeTab extends SisTab {
             filename
         };
         exec(cmd, null, path);
-        if(getStdErr().length() > 0) {
+        if(getErrors().length() > 0) {
             JOptionPane.showMessageDialog(this, getStdErr(),
                                           "BlifPad",
                                           JOptionPane.ERROR_MESSAGE);

@@ -1,6 +1,6 @@
-/* OsAdapter.java */
+/* StateAssignAction.java */
 
-/* BlifPad -- A simple editor for Blif files
+/* <project_name> -- <project_description>
  *
  * Copyright (C) 2006 - 2007
  *     Giuseppe Coviello <cjg@cruxppc.org>
@@ -20,15 +20,19 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-import javax.swing.Action;
-import javax.swing.JMenuBar;
+import java.awt.event.ActionEvent;
+import javax.swing.ImageIcon;
 
-public interface OsAdapter {
-    public void setMainWindow(MainWindow mainWindow);
-    public void mainWindowClosing();
-    public String getOpeningFilepath();
-    public String getSavingFilepath();
-    public JMenuBar getMenuBar(RecentFileMenu recentf);
-    public void updateFileMenu(Action[] actions);
-    public void updateEditMenu(Action[] actions);
+public class StateAssignAction extends ActionClass {
+    private MainWindow mainWindow;
+    private static ImageIcon icon = new ImageIcon(ResourceLoader.getUrl("images/state_assign.png"));
+
+    public StateAssignAction(MainWindow mainWindow) {
+        super(ResourceLoader._("State Assign"), -1, icon); 
+        this.mainWindow = mainWindow;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        mainWindow.stateAssignCurrentDocument();
+    }
 }

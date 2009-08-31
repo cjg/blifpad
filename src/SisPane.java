@@ -26,15 +26,18 @@ public class SisPane extends JTabbedPane {
     private EqnTab eqnTab;
     private SimTab simTab;
     private StatsTab statsTab;
+    private KissTab kissTab;
 
     public SisPane(Notebook notebook) {
         super(JTabbedPane.TOP);
         eqnTab = new EqnTab(notebook);
         simTab = new SimTab(notebook);
         statsTab = new StatsTab(notebook);
+        kissTab = new KissTab(notebook);
         addTab(ResourceLoader._("Equation"), EqnAction.icon, eqnTab);
         addTab(ResourceLoader._("Simulation"), SimulateAction.icon, simTab);
         addTab(ResourceLoader._("Stats"), StatsAction.icon, statsTab);
+        addTab(ResourceLoader._("Transictions"), KissAction.icon, kissTab);
     }
 
     public SimTab getSimTab() {
@@ -47,5 +50,9 @@ public class SisPane extends JTabbedPane {
 
     public StatsTab getStatsTab() {
         return statsTab;
+    }
+
+    public KissTab getKissTab() {
+        return kissTab;
     }
 }

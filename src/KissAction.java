@@ -1,6 +1,6 @@
-/* OsAdapter.java */
+/* KissAction.java */
 
-/* BlifPad -- A simple editor for Blif files
+/* <project_name> -- <project_description>
  *
  * Copyright (C) 2006 - 2007
  *     Giuseppe Coviello <cjg@cruxppc.org>
@@ -20,15 +20,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-import javax.swing.Action;
-import javax.swing.JMenuBar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionEvent;
+import javax.swing.ImageIcon;
 
-public interface OsAdapter {
-    public void setMainWindow(MainWindow mainWindow);
-    public void mainWindowClosing();
-    public String getOpeningFilepath();
-    public String getSavingFilepath();
-    public JMenuBar getMenuBar(RecentFileMenu recentf);
-    public void updateFileMenu(Action[] actions);
-    public void updateEditMenu(Action[] actions);
+public class KissAction extends ActionClass {
+    private MainWindow mainWindow;
+    public final static ImageIcon icon = new ImageIcon(ResourceLoader.getUrl("images/transictions.png"));
+
+    public KissAction(MainWindow mainWindow) {
+        super(ResourceLoader._("Write Transictions Table"), -1, icon); 
+        this.mainWindow = mainWindow;
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        mainWindow.writeKiss();
+    }
 }

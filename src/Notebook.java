@@ -93,6 +93,7 @@ public class Notebook extends JTabbedPane {
             mainWindow.updateToolbar((Tab)getSelectedComponent());
             mainWindow.updateTitle(makeTitle((Tab)getSelectedComponent(),
                                              false));
+            mainWindow.updateSimulationTab();
         } catch(Exception e){}
     }
 

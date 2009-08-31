@@ -56,9 +56,9 @@ public class AboutBox extends SFrame implements ActionListener {
     
         aboutLabel[1] = new JLabel("BlifPad");
         aboutLabel[1].setFont(titleFont);
-        aboutLabel[2] = new JLabel("0.2");
+        aboutLabel[2] = new JLabel("0.3");
         // aboutLabel[2].setFont(bodyFont);
-        aboutLabel[3] = new JLabel("Copyright 2006 Giuseppe Coviello");
+        aboutLabel[3] = new JLabel("Copyright 2006-2007 Giuseppe Coviello");
 	//        aboutLabel[3].setFont(bodyFont);
       
         Panel textPanel2 = new Panel(new GridLayout(labelCount, 1));

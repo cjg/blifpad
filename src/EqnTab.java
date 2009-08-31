@@ -24,30 +24,22 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.JViewport;
 
-public class EqnTab extends SisTab {
-    protected ConsolePane eqnPane;
-    protected JCheckBox fullSimplifyBox;
-    protected JCheckBox decompBox;
-    protected JCheckBox minimizeBox;
+public class EqnTab extends FullOptionalTab {
+    private JCheckBox decompBox;
     private JButton eqnButton;
-    private MyPreferences myPreferences;
-    protected SimplifyTab simplify;
-    protected DecompTab decomp;
-    protected MinimizeTab minimize;
+    public final static ImageIcon sequentialIcon = new ImageIcon(ResourceLoader.getUrl("images/sequential.png"));
+    public final static ImageIcon combinatoryIcon = new ImageIcon(ResourceLoader.getUrl("images/combinatory.png"));
 
     public EqnTab(Notebook notebook) {
         super();
+        myPreferences = new MyPreferences();
         this.notebook = notebook;
         buildLayout();
         eqnButton.addActionListener(new EqnListener());
@@ -56,16 +48,47 @@ public class EqnTab extends SisTab {
     public void writeEquation() {
         if(!check())
             return;
-        if(myPreferences == null)
-            myPreferences = new MyPreferences();
 
         String filename = getFilename();
+
+        File stateMinimized = null;
+       
+        if(stateMinimizeBox.isSelected()) {
+            try {
+                stateMinimized = getStateMinimizedFile(filename);
+                filename = stateMinimized.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
+
+        File stateAssigned = null;
+       
+        if(stateAssignBox.isSelected()) {
+            try {
+                stateAssigned = getStateAssignedFile(filename);
+                filename = stateAssigned.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
+
+        File netBuilt = null;
+       
+        if(buildNetworkBox.isSelected()) {
+            try {
+                netBuilt = getNetBuiltFile(filename);
+                filename = netBuilt.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
 
         File simplified = null;
        
         if(fullSimplifyBox.isSelected()) {
             try {
-                simplified = getSimplifiedFile();
+                simplified = getSimplifiedFile(filename);
                 filename = simplified.getName();
             } catch (IOException e) {
                 return;
@@ -103,6 +126,12 @@ public class EqnTab extends SisTab {
 
         exec(cmd, null, getPath());
 
+        if(stateMinimized != null)
+            stateMinimized.delete();
+        if(stateAssigned != null)
+            stateAssigned.delete();
+        if(netBuilt != null)
+            netBuilt.delete();
         if(simplified != null)
             simplified.delete();
         if(decomposed != null)
@@ -119,51 +148,33 @@ public class EqnTab extends SisTab {
         if(getStdErr().length() > 0)
             formattedOutput += "<font color='red'>" + getStdErr() + "</font><br>";
         formattedOutput += getStdOut() + "</font></pre></b></body>";
-        eqnPane.setText(formattedOutput);
+        consolePane.setText(formattedOutput);
     }
 
-    protected File getSimplifiedFile() throws IOException {
-        if(simplify == null)
-            simplify = new SimplifyTab(notebook);
-        File simplified = File.createTempFile(getFilename(), ".blif", new
-                                              File(getPath()));
-        simplify.simplify(getFilename(), simplified.getName(), getPath());
-        return simplified;
-    }
-
-    protected File getDecomposedFile(String filename) throws IOException {
-        if(decomp == null)
-            decomp = new DecompTab(notebook);
-        File decomposed = File.createTempFile(filename, ".blif", new
-                                              File(getPath()));
-        decomp.decomp(filename, decomposed.getName(), getPath());
-        return decomposed;
-    }
-
-    protected File getMinimizedFile(String filename) throws IOException {
-        if(minimize == null)
-            minimize = new MinimizeTab(notebook);
-        File minimized = File.createTempFile(filename, ".blif", new
-                                              File(getPath()));
-        minimize.minimize(filename, minimized.getName(), getPath());
-        return minimized;
-    }
-            
     private void buildLayout() {
         setLayout(new BorderLayout());
-        fullSimplifyBox = new JCheckBox(ResourceLoader._("Full Simplify"));
+        makeCommonControl("EQN");
         decompBox = new JCheckBox(ResourceLoader._("Decompose"));
-        minimizeBox = new JCheckBox(ResourceLoader._("Minimize"));
         eqnButton = new JButton(ResourceLoader._("Write Equation"));
-        
+        sequentialPanel.add(stateMinimizeBox);
+        sequentialPanel.add(stateAssignBox);
+        sequentialPanel.add(buildNetworkBox);
+
+        combinatoryPanel.add(fullSimplifyBox);
+        combinatoryPanel.add(decompBox);
+        combinatoryPanel.add(minimizeBox);
+
         JPanel controlPanel = new JPanel();
-        controlPanel.add(fullSimplifyBox);
-        controlPanel.add(decompBox);
-        controlPanel.add(minimizeBox);
+        controlPanel.add(sequentialButton);
+        controlPanel.add(sequentialPanel);
+        controlPanel.add(combinatoryButton);
+        controlPanel.add(combinatoryPanel);
         controlPanel.add(eqnButton);
-        eqnPane = new ConsolePane();
-        add(controlPanel, BorderLayout.NORTH);
-        add(eqnPane, BorderLayout.CENTER);
+        consolePane = new ConsolePane();
+        add(new JScrollPane(controlPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+            BorderLayout.NORTH);
+        add(consolePane, BorderLayout.CENTER);
     }
 
     public class EqnListener implements ActionListener {

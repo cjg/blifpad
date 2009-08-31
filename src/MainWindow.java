@@ -48,6 +48,10 @@ public class MainWindow extends SFrame {
     private SimplifyTab simplify;
     private DecompTab decomp;
     private MinimizeTab minimize;
+    private StateAssignTab stateAssign;
+    private StateMinimizeTab stateMinimize;
+    private BuildNetworkTab buildNetwork;
+    private RecentFileMenu recentf;
     final protected OsAdapter osAdapter;
     private static MyPreferences myPreferences = new MyPreferences();
 
@@ -55,7 +59,8 @@ public class MainWindow extends SFrame {
         super("", myPreferences.getLocation());
         this.osAdapter = osAdapter;
         this.osAdapter.setMainWindow(this);
-        setJMenuBar(osAdapter.getMenuBar());
+        recentf = new RecentFileMenu(this);
+        setJMenuBar(osAdapter.getMenuBar(recentf));
         setDefaultCloseOperation(0);
         addWindowListener(new WindowAdapter() {
                 public void windowClosing(WindowEvent e) {
@@ -81,11 +86,13 @@ public class MainWindow extends SFrame {
         String filepath = osAdapter.getOpeningFilepath();
         if(filepath != null)
             notebook.openDocument(filepath);
+        recentf.appendFile(filepath);
     }
 
     public void openDocument(String filepath) {
         while(notebook == null){}
         notebook.openDocument(filepath);
+        recentf.appendFile(filepath);
     }
 
     public void updateToolbar(Tab tab) {
@@ -123,6 +130,10 @@ public class MainWindow extends SFrame {
         setTitle("BlifPad - " + title);
     }
 
+    public void updateSimulationTab() {
+        sisPane.getSimTab().setText(notebook.getSelectedTab().getSimulation().getOutput());
+    }
+
     public void simulate() {
         sisPane.setSelectedComponent(sisPane.getSimTab());
         sisPane.getSimTab().simulate();
@@ -136,6 +147,11 @@ public class MainWindow extends SFrame {
     public void printStats() {
         sisPane.setSelectedComponent(sisPane.getStatsTab());
         sisPane.getStatsTab().printStats();
+    }
+
+    public void writeKiss() {
+        sisPane.setSelectedComponent(sisPane.getKissTab());
+        sisPane.getKissTab().writeKiss();
     }
 
     public void simplifyCurrentDocument() {
@@ -158,6 +174,30 @@ public class MainWindow extends SFrame {
         if(minimize == null)
             minimize = new MinimizeTab(notebook);
         String filepath = minimize.minimize();
+        if(filepath != null)
+            openDocument(filepath);
+    }
+
+    public void stateAssignCurrentDocument() {
+        if(stateAssign == null)
+            stateAssign = new StateAssignTab(notebook);
+        String filepath = stateAssign.stateAssign();
+        if(filepath != null)
+            openDocument(filepath);
+    }
+
+    public void stateMinimizeCurrentDocument() {
+        if(stateMinimize == null)
+            stateMinimize = new StateMinimizeTab(notebook);
+        String filepath = stateMinimize.stateMinimize();
+        if(filepath != null)
+            openDocument(filepath);
+    }
+
+    public void buildNetworkCurrentDocument() {
+        if(buildNetwork == null)
+            buildNetwork = new BuildNetworkTab(notebook);
+        String filepath = buildNetwork.buildNetwork();
         if(filepath != null)
             openDocument(filepath);
     }
@@ -190,28 +230,6 @@ public class MainWindow extends SFrame {
         getContentPane().add(mainPanel);
         pack();
     }
-
-//     public class NewAction extends ActionClass {
-//         public NewAction() {
-//             super(ResourceLoader._("New"), KeyEvent.VK_N, 
-//                   new ImageIcon(getUrl("images/new.png")));
-//         }
-
-//         public void actionPerformed(ActionEvent e) {
-//             newDocument();
-//         }
-//     }
-
-//     public class OpenAction extends ActionClass {
-//         public OpenAction() {
-//             super(ResourceLoader._("Open ..."), KeyEvent.VK_O, 
-//                   new ImageIcon(getUrl("images/open.png")));
-//         }
-
-//         public void actionPerformed(ActionEvent e) {
-//             openDocument();
-//         }
-//     }
 
     public static void main(String[] argv) {
         new MainWindow(new MacosxAdapter());

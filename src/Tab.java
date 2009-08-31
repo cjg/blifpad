@@ -57,6 +57,7 @@ public class Tab extends JScrollPane {
     private PasteAction pasteAction;
     private Action[] fileActions;
     private Action[] editActions;
+    private Simulation simulation;
     protected JPopupMenu popupMenu;
     protected UndoManager undo = new UndoManager();
     protected UndoAction undoAction;
@@ -78,6 +79,7 @@ public class Tab extends JScrollPane {
         this.notebook = notebook;
         this.filepath = filepath;
         this.osAdapter = osAdapter;
+        simulation = new Simulation();
         editor = new Editor(this, listener, filepath);
         saveAction = new SaveAction();
         saveAsAction = new SaveAsAction();
@@ -111,6 +113,10 @@ public class Tab extends JScrollPane {
         editor.requestFocus();
     }
 
+    public Simulation getSimulation() {
+        return simulation;
+    }
+
     public String getTitle() {
         if(filepath == null)
             return ResourceLoader._("No Name");
@@ -141,6 +147,7 @@ public class Tab extends JScrollPane {
             saveAs();
             return;
         }
+        simulation.reset();
         String text = editor.getText();
         if(!text.endsWith("\n"))
             text = text + "\n";
@@ -253,7 +260,7 @@ public class Tab extends JScrollPane {
                 undo.undo();
                 editor.requestFocus();
             } catch (CannotUndoException ex) {
-                System.out.println("Unable to undo: " + ex);
+                System.err.println("Unable to undo: " + ex);
                 ex.printStackTrace();
             }
             updateUndoState();
@@ -282,7 +289,7 @@ public class Tab extends JScrollPane {
                 undo.redo();
                 editor.requestFocus();
             } catch (CannotRedoException ex) {
-                System.out.println("Unable to redo: " + ex);
+                System.err.println("Unable to redo: " + ex);
                 ex.printStackTrace();
             }
             updateRedoState();

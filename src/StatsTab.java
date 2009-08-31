@@ -21,6 +21,7 @@
  */
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -31,16 +32,15 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
-public class StatsTab extends EqnTab {
-    protected ConsolePane statsPane;
-    protected JCheckBox fullSimplifyBox;
-    private JCheckBox minimizeBox;
+public class StatsTab extends FullOptionalTab {
     private JButton statsButton;
-    private MyPreferences myPreferences;
 
     public StatsTab(Notebook notebook) {
-        super(notebook);
+        super();
+        myPreferences = new MyPreferences();
+        this.notebook = notebook;
         buildLayout();
         statsButton.addActionListener(new StatsListener());
     }
@@ -48,16 +48,47 @@ public class StatsTab extends EqnTab {
     public void printStats() {
         if(!check())
             return;
-        if(myPreferences == null)
-            myPreferences = new MyPreferences();
 
         String filename = getFilename();
+
+        File stateMinimized = null;
+       
+        if(stateMinimizeBox.isSelected()) {
+            try {
+                stateMinimized = getStateMinimizedFile(filename);
+                filename = stateMinimized.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
+
+        File stateAssigned = null;
+       
+        if(stateAssignBox.isSelected()) {
+            try {
+                stateAssigned = getStateAssignedFile(filename);
+                filename = stateAssigned.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
+
+        File netBuilt = null;
+       
+        if(buildNetworkBox.isSelected()) {
+            try {
+                netBuilt = getNetBuiltFile(filename);
+                filename = netBuilt.getName();
+            } catch (IOException e) {
+                return;
+            }
+        }
 
         File simplified = null;
        
         if(fullSimplifyBox.isSelected()) {
             try {
-                simplified = getSimplifiedFile();
+                simplified = getSimplifiedFile(filename);
                 filename = simplified.getName();
             } catch (IOException e) {
                 return;
@@ -85,6 +116,12 @@ public class StatsTab extends EqnTab {
 
         exec(cmd, null, getPath());
 
+        if(stateMinimized != null)
+            stateMinimized.delete();
+        if(stateAssigned != null)
+            stateAssigned.delete();
+        if(netBuilt != null)
+            netBuilt.delete();
         if(simplified != null)
             simplified.delete();
         if(minimized != null)
@@ -99,22 +136,31 @@ public class StatsTab extends EqnTab {
         if(getStdErr().length() > 0)
             formattedOutput += "<font color='red'>" + getStdErr() + "</font><br>";
         formattedOutput += getStdOut() + "</font></pre></b></body>";
-        statsPane.setText(formattedOutput);
+        consolePane.setText(formattedOutput);
     }
 
     private void buildLayout() {
         setLayout(new BorderLayout());
-        fullSimplifyBox = new JCheckBox(ResourceLoader._("Full Simplify"));
-        minimizeBox = new JCheckBox(ResourceLoader._("Minimize"));
         statsButton = new JButton(ResourceLoader._("Print Stats"));
-        
+        makeCommonControl("STATS");
+        sequentialPanel.add(stateMinimizeBox);
+        sequentialPanel.add(stateAssignBox);
+        sequentialPanel.add(buildNetworkBox);
+
+        combinatoryPanel.add(fullSimplifyBox);
+        combinatoryPanel.add(minimizeBox);
+
         JPanel controlPanel = new JPanel();
-        controlPanel.add(fullSimplifyBox);
-        controlPanel.add(minimizeBox);
+        controlPanel.add(sequentialButton);
+        controlPanel.add(sequentialPanel);
+        controlPanel.add(combinatoryButton);
+        controlPanel.add(combinatoryPanel);
         controlPanel.add(statsButton);
-        statsPane = new ConsolePane();
-        add(controlPanel, BorderLayout.NORTH);
-        add(statsPane, BorderLayout.CENTER);
+        consolePane = new ConsolePane();
+        add(new JScrollPane(controlPanel, JScrollPane.VERTICAL_SCROLLBAR_NEVER,
+                            JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED),
+            BorderLayout.NORTH);
+        add(consolePane, BorderLayout.CENTER);
     }
 
     public class StatsListener implements ActionListener {

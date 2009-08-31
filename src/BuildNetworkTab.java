@@ -1,6 +1,6 @@
-/* DecompTab.java */
+/* BuildNetworkTab.java */
 
-/* BlifPad -- A simple editor for Blif files
+/* <project_name> -- <project_description>
  *
  * Copyright (C) 2006 - 2007
  *     Giuseppe Coviello <cjg@cruxppc.org>
@@ -25,20 +25,20 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 
-public class DecompTab extends SisTab {
+public class BuildNetworkTab extends SisTab {
     private MyPreferences myPreferences;
 
-    public DecompTab(Notebook notebook) {
+    public BuildNetworkTab(Notebook notebook) {
         super();
         this.notebook = notebook;
     }
 
-    public String decomp(String infile, String outfile, String path) {
+    public String buildNetwork(String infile, String outfile, String path) {
         if(myPreferences == null)
             myPreferences = new MyPreferences();
         String cmd[] = {
             myPreferences.getSisPath(),
-            "-c", "decomp",
+            "-c", "stg_to_network",
             "-t", "blif",
             "-T", "blif",
             infile
@@ -51,12 +51,19 @@ public class DecompTab extends SisTab {
             return null;
         }
         try {
+            String content = getStdOut();
+            int modelIndex = content.indexOf(".model");
+            String[] toComment = content.substring(0, modelIndex).split("\n");
+            content = content.substring(modelIndex);
+            
+            for(int i= toComment.length -1; i>=0; i--)
+                content = "# " + toComment[i] + "\n" + content;
             FileOutputStream fos = new FileOutputStream(path +
                                                         File.separator +
                                                         outfile);
 
 
-            fos.write(getStdOut().getBytes());
+            fos.write(content.getBytes());
             fos.close();
         } catch (IOException e) {
             return null;
@@ -65,14 +72,14 @@ public class DecompTab extends SisTab {
     }
 
 
-    public String decomp() {
+    public String buildNetwork() {
         if(!check())
             return null;
         if(myPreferences == null)
             myPreferences = new MyPreferences();
 
-        return decomp(getFilename(), getFilename().replaceAll(".blif",
-                                                            "_decomposed.blif"),
-                    getPath());
+        return buildNetwork(getFilename(), getFilename().replaceAll(".blif",
+                                                            "_net_built.blif"),
+                             getPath());
     }
 }

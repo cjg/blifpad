@@ -32,7 +32,7 @@ import javax.swing.JMenuBar;
 
 public class MacosxAdapter implements OsAdapter {
     private Application fApplication = Application.getApplication();
-    private MainWindow mainWindow;
+    protected MainWindow mainWindow;
     private FileDialog openDialog;
     private FileDialog saveDialog;
     private AboutBox aboutBox;
@@ -53,8 +53,9 @@ public class MacosxAdapter implements OsAdapter {
         fApplication.addApplicationListener(new
                                             com.apple.eawt.ApplicationAdapter() {
                 public void handleOpenFile(ApplicationEvent event) {
-                    while(mainWindow == null);
-                    mainWindow.openDocument(event.getFilename());
+                    //while(mainWindow == null);
+                    //mainWindow.openDocument(event.getFilename());
+                    new DocumentOpener(event.getFilename()).start();
                 }
 
                 public void handleAbout(ApplicationEvent e) {
@@ -105,33 +106,27 @@ public class MacosxAdapter implements OsAdapter {
         return saveDialog.getDirectory() + saveDialog.getFile();
     }
 
-    public JMenuBar getMenuBar() {
+    public JMenuBar getMenuBar(RecentFileMenu recentf) {
         JMenuBar menuBar = new JMenuBar();
         fileMenu = new JMenu(ResourceLoader._("File"));
         fileMenu.add(new NewAction(mainWindow));
         fileMenu.add(new OpenAction(mainWindow));
+        fileMenu.add(recentf);
         editMenu = new JMenu(ResourceLoader._("Edit"));
-        JMenu commandsMenu = new JMenu(ResourceLoader._("Commands"));
-        commandsMenu.add(new SimulateAction(mainWindow));
-        commandsMenu.add(new EqnAction(mainWindow));
-        commandsMenu.add(new SimplifyAction(mainWindow));
-        commandsMenu.add(new DecompAction(mainWindow));
-        commandsMenu.add(new MinimizeAction(mainWindow));
-        commandsMenu.add(new StatsAction(mainWindow));
         JMenu helpMenu = new JMenu(ResourceLoader._("Help"));
         helpMenu.add(new LicenseAction(mainWindow));
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
-        menuBar.add(commandsMenu);
+        menuBar.add(new CommandsMenu(mainWindow));
         menuBar.add(helpMenu);
         return menuBar;
     }
 
     public void updateFileMenu(Action[] actions) {
-        if(fileMenu.getItemCount()>3){
-            fileMenu.remove(2);
-            fileMenu.remove(2);
-            fileMenu.remove(2);
+        if(fileMenu.getItemCount()>4){
+            fileMenu.remove(3);
+            fileMenu.remove(3);
+            fileMenu.remove(3);
         }
         fileMenu.add(actions[0]);
         fileMenu.add(actions[1]);
@@ -180,6 +175,25 @@ public class MacosxAdapter implements OsAdapter {
             if(name.endsWith(".blif"))
                 return true;
             return false;
+        }
+    }
+
+    public class DocumentOpener implements Runnable {
+        private String filepath;
+        private Thread thread;
+        
+        public DocumentOpener(String filepath) {
+            this.filepath = filepath;
+        }
+        
+        public void start() {
+                thread = new Thread(this);
+                thread.start();
+        }
+        
+        public void run() {
+            while(mainWindow == null);
+            mainWindow.openDocument(filepath);
         }
     }
 }

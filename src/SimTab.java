@@ -39,13 +39,17 @@ public class SimTab extends SisTab {
     private ConsolePane simPane;
     protected BinField simField;
     private JButton simButton;
+    private JButton resetButton;
     private MyPreferences myPreferences;
+    public final static String quotechar =
+    System.getProperty("file.separator").equals("\\") ? "'":"";
 
     public SimTab(Notebook notebook) {
         super();
         this.notebook = notebook;
         buildLayout();
         simButton.addActionListener(new SimListener());
+        resetButton.addActionListener(new ResetListener());
     }
 
     public void simulate() {
@@ -60,11 +64,13 @@ public class SimTab extends SisTab {
         for(i =0; i<inputs_array.length;i++)
             inputs = inputs+ " "+inputs_array[i];
         inputs = inputs.trim();
+        Simulation simulation = notebook.getSelectedTab().getSimulation();
+        simulation.addInputs(inputs);
         String cmd[] = {
             myPreferences.getSisPath(),
             "-t", "blif",
             "-T", "none",
-            "-c", "simulate " + inputs,
+            "-f", simulation.getScript().getPath(),
             getFilename()
         };
         exec(cmd, null, getPath());
@@ -75,17 +81,30 @@ public class SimTab extends SisTab {
             formattedOutput += "<font color='red'>" + getStdErr() + "</font><br>";
         formattedOutput += getStdOut() + "</font></pre></b></body>";
         simPane.setText(formattedOutput);
+        simulation.setOutput(formattedOutput);
+    }
+
+    public void reset() {
+        Simulation simulation = notebook.getSelectedTab().getSimulation();
+        simulation.reset();
+        simPane.setText("");
+    }
+
+    public void setText(String output) {
+        simPane.setText(output);
     }
 
     private void buildLayout() {
         setLayout(new BorderLayout());
         simField = new BinField(10);
         simButton = new JButton(ResourceLoader._("Simulate"));
+        resetButton = new JButton(ResourceLoader._("Reset"));
 
         JPanel controlPanel = new JPanel();
         controlPanel.add(new JLabel(ResourceLoader._("Inputs: ")));
         controlPanel.add(simField);
         controlPanel.add(simButton);
+        controlPanel.add(resetButton);
         simPane = new ConsolePane();
         add(controlPanel, BorderLayout.NORTH);
         add(simPane, BorderLayout.CENTER);
@@ -94,6 +113,12 @@ public class SimTab extends SisTab {
     public class SimListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             simulate();
+        }
+    }
+
+    public class ResetListener implements ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            reset();
         }
     }
 }

@@ -89,6 +89,12 @@ public class SyntaxDocument extends DefaultStyledDocument {
 		keywords.add(".output_load");
 		keywords.add(".default_output_load");
 		keywords.add(".wire");
+		keywords.add(".i");
+		keywords.add(".o");
+        keywords.add(".p");
+		keywords.add(".r");
+		keywords.add(".s");
+		keywords.add(".latch_order");
 	}
 
 

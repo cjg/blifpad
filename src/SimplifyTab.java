@@ -44,7 +44,7 @@ public class SimplifyTab extends SisTab {
             infile
         };
         exec(cmd, null, path);
-        if(getStdErr().length() > 0) {
+        if(getErrors().length() > 0) {
             JOptionPane.showMessageDialog(this, getStdErr(),
                                           "BlifPad",
                                           JOptionPane.ERROR_MESSAGE);

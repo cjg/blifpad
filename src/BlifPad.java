@@ -23,9 +23,9 @@
 public class BlifPad {
     public static void main(String[] argv) {
         OsAdapter osAdapter;
-
-        if("Mac OS X".equals(System.getProperty("os.name")))
-            osAdapter = new MacosxAdapter();
+        String osName = System.getProperty("os.name");
+        if(osName.equals("Mac OS X"))
+               osAdapter = new MacosxAdapter();
         else
             osAdapter = new DefaultAdapter();
 

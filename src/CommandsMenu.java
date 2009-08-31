@@ -1,6 +1,6 @@
-/* OsAdapter.java */
+/* CommandsMenu.java */
 
-/* BlifPad -- A simple editor for Blif files
+/* <project_name> -- <project_description>
  *
  * Copyright (C) 2006 - 2007
  *     Giuseppe Coviello <cjg@cruxppc.org>
@@ -20,15 +20,21 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-import javax.swing.Action;
-import javax.swing.JMenuBar;
+import javax.swing.JMenu;
 
-public interface OsAdapter {
-    public void setMainWindow(MainWindow mainWindow);
-    public void mainWindowClosing();
-    public String getOpeningFilepath();
-    public String getSavingFilepath();
-    public JMenuBar getMenuBar(RecentFileMenu recentf);
-    public void updateFileMenu(Action[] actions);
-    public void updateEditMenu(Action[] actions);
+public class CommandsMenu extends JMenu {
+    public CommandsMenu(MainWindow mainWindow) {
+        super(ResourceLoader._("Commands"));
+        add(new EqnAction(mainWindow));
+        add(new SimulateAction(mainWindow));
+        add(new StatsAction(mainWindow));
+        add(new KissAction(mainWindow));
+        addSeparator();
+        add(new StateMinimizeAction(mainWindow));
+        add(new StateAssignAction(mainWindow));
+        add(new BuildNetworkAction(mainWindow));
+        add(new SimplifyAction(mainWindow));
+        add(new DecompAction(mainWindow));
+        add(new MinimizeAction(mainWindow));
+    }
 }

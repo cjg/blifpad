@@ -20,16 +20,20 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.swing.JPanel;
 import java.text.MessageFormat;
+import javax.swing.JPanel;
 
 public abstract class SisTab extends JPanel {
     private String stdout;
     private String stderr;
+    private String warnings;
+    private String errors;
     protected Notebook notebook;
+    private static boolean usingWindows = System.getProperty("file.separator").equals("\\");
 
     public String getStdOut() {
         return stdout;
@@ -37,6 +41,14 @@ public abstract class SisTab extends JPanel {
 
     public String getStdErr() {
         return stderr;
+    }
+
+    public String getErrors() {
+        return errors;
+    }
+
+    public String getWarnings() {
+        return warnings;
     }
 
     public boolean check() {
@@ -67,22 +79,91 @@ public abstract class SisTab extends JPanel {
         Tab tab = notebook.getSelectedTab();
         return tab.getTitle().substring(0, tab.getTitle().lastIndexOf(File.separator));
     }
-    
+
     protected void exec(String[] cmd, String envp[], String wdir) {
         try {
-            Process process = Runtime.getRuntime().exec(cmd, envp, new
-                                                        File(wdir));
+            Process process;
+            if(usingWindows){
+                process = Runtime.getRuntime().exec(formatWindowsCmd(cmd), envp,
+                                                    new File(wdir));
+            } else
+                process = Runtime.getRuntime().exec(cmd, makeUnixEnvp(cmd, envp), 
+                                                    new File(wdir));
+            final DataInputStream dos = new DataInputStream(process.getInputStream());
+            final DataInputStream des = new DataInputStream(process.getErrorStream());
+
+            stdout = "";
+            Thread thread = new Thread("input stream") {
+                    public void run() {
+                        try {
+                            String line=null;
+                            while ((line = dos.readLine()) != null) 
+                                stdout += line + "\n";
+                        }
+                        catch (IOException e) {
+                            System.err.println(e);
+                        }
+                    }
+                };
+            thread.start();
+
+            stderr = "";
+            warnings = "";
+            errors = "";
+            Thread thread2 = new Thread("error stream") {
+                    public void run() {
+                        try {
+                            String line=null;
+                            while ((line = des.readLine()) != null) {
+                                stderr += line + "\n";
+                                if(line.startsWith("Warning"))
+                                    warnings += line + "\n";
+                                else
+                                    errors += line + "\n";
+                            }
+                        }
+                        catch (IOException e) {
+                            System.err.println(e);
+                        }
+                    }
+                };
+            thread2.start();
+
             process.waitFor();
-            InputStream outStream = process.getInputStream();
-            InputStream errStream = process.getErrorStream();
-            byte out[] = new byte[outStream.available()];
-            byte err[] = new byte[errStream.available()];
-            outStream.read(out);
-            errStream.read(err);
-            stdout = new String(out);
-            stderr = new String(err);
         } catch (InterruptedException e) {
         } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
+
+    private String[] makeUnixEnvp(String[] cmd, String[] envp) {
+        String[] unixEnvp;
+        int i=0;
+        if(envp == null)
+            unixEnvp = new String[1];
+        else {
+            unixEnvp = new String[envp.length + 1];
+            for(i=0;i<envp.length;i++)
+                unixEnvp[i] = envp[i];
+        }
+        if(cmd[0].lastIndexOf("/")>0) {
+            String sisPath = cmd[0].substring(0, cmd[0].lastIndexOf("/"));
+            unixEnvp[i] = "PATH=$PATH:" + sisPath; 
+        }
+        return unixEnvp;
+    }
+
+    private String formatWindowsCmd(String[] cmd) {
+        int i;
+        String _cmd = "cmd /C \""; 
+        if(cmd[0].indexOf("\\")>0) {
+            String sisPath = cmd[0].substring(0, cmd[0].lastIndexOf("\\"));
+            _cmd += "path %PATH%;" + sisPath + " && "; 
+        }
+        for(i=0;i<cmd.length;i++) {
+            _cmd += cmd[i] + " ";
+        }
+        _cmd += "\"";
+        return _cmd;
     }
 }

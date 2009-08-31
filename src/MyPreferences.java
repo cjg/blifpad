@@ -97,6 +97,15 @@ public class MyPreferences {
     public void setDividerLocation(int dl) {
         preferences.putInt("DIVIDER_LOCATION", dl);
     }
+
+    public boolean getPanelVisible(String panel) {
+        return preferences.getBoolean (panel, false);
+    }
+
+    public void setPanelVisible(String panel, boolean visible) {
+        preferences.putBoolean(panel, visible);
+    }
+
 //     public String getDownloadDir() {
 //         return preferences.get("DOWNLOAD_DIR", System.getProperty("user.home"));
 //     }

@@ -77,21 +77,15 @@ public class DefaultAdapter implements OsAdapter {
         return saveDialog.getSelectedFile().getPath();
     }
 
-    public JMenuBar getMenuBar(){
+    public JMenuBar getMenuBar(RecentFileMenu recentf) {
         JMenuBar menuBar = new JMenuBar();
         fileMenu = new JMenu(ResourceLoader._("File"));
         fileMenu.add(new NewAction(mainWindow));
         fileMenu.add(new OpenAction(mainWindow));
+        fileMenu.add(recentf);
         quitAction = new QuitAction(mainWindow);
         fileMenu.add(quitAction);
         editMenu = new JMenu(ResourceLoader._("Edit"));
-        JMenu commandsMenu = new JMenu(ResourceLoader._("Commands"));
-        commandsMenu.add(new SimulateAction(mainWindow));
-        commandsMenu.add(new EqnAction(mainWindow));
-        commandsMenu.add(new SimplifyAction(mainWindow));
-        commandsMenu.add(new DecompAction(mainWindow));
-        commandsMenu.add(new MinimizeAction(mainWindow));
-        commandsMenu.add(new StatsAction(mainWindow));
         JMenu optionsMenu = new JMenu(ResourceLoader._("Options"));
         optionsMenu.add(new PreferencesAction(mainWindow));
         JMenu helpMenu = new JMenu(ResourceLoader._("Help"));
@@ -99,21 +93,21 @@ public class DefaultAdapter implements OsAdapter {
         helpMenu.add(new LicenseAction(mainWindow));
         menuBar.add(fileMenu);
         menuBar.add(editMenu);
-        menuBar.add(commandsMenu);
+        menuBar.add(new CommandsMenu(mainWindow));
         menuBar.add(optionsMenu);
         menuBar.add(helpMenu);
         return menuBar;
     }
 
     public void updateFileMenu(Action[] actions) {
-        if(fileMenu.getItemCount()>3){
-            fileMenu.remove(2);
-            fileMenu.remove(2);
-            fileMenu.remove(2);
+        if(fileMenu.getItemCount()>4){
+            fileMenu.remove(3);
+            fileMenu.remove(3);
+            fileMenu.remove(3);
         }
-        fileMenu.insert(actions[0], 2);
-        fileMenu.insert(actions[1], 3);
-        fileMenu.insert(actions[2], 4);
+        fileMenu.insert(actions[0], 3);
+        fileMenu.insert(actions[1], 4);
+        fileMenu.insert(actions[2], 5);
     }
 
     public void updateEditMenu(Action[] actions) {
